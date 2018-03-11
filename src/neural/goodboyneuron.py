@@ -5,7 +5,6 @@ def sigmoid(x):
 
 class neuron(object):
 	def __init__(self, inputs, weights = None, bias = 0):
-
 		if weights == None:
 			weights = np.zeros(len(inputs))
 
@@ -20,6 +19,9 @@ class neuron(object):
 		sum += self.bias
 		self.last_output = sigmoid(sum)
 		return self.last_output
+
+	def connect(self, other_neuron, weight = 0):
+		self.connections.append((other_neuron, weight))
 
 
 class input_neuron(object):
