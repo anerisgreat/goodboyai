@@ -220,5 +220,5 @@ setup(
 		(setup_config.package_name + '='+ setup_config.package_name + '.__main__:main'),
 		],
 	},
-	install_requires=[],
+	install_requires=['numpy'],
 	)
