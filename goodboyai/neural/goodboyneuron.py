@@ -59,7 +59,8 @@ class neuron(object):
 		for i in range(n_outputs_saved):
 			self.output_queue.appendleft(0)
 		#Initializing endorphinization 
-		self.endorphinize_weights = 
+		self.endorphinize_weights = [pow(0.5, i - 1) \
+										for i in range(n_outputs_saved)] 
 
 	def get_output(self, n_iter):
 		if(n_iter == self.last_iter):
@@ -82,7 +83,11 @@ class neuron(object):
 		self.connections.appendleft((other_neuron, weight))
 
 	def endorphinize(self, value):
-		
+		for connection in self.connections:
+			contribution = np.inner(self.endorphinize_weights, \
+							connection.in_neuron.output_queue)
+			connection.weight *= (1 + contribution)
+			connection.degr_factor /= (1 + contribution)
 
 class input_neuron(neuron):
 	def __init__(self, output = 0):
