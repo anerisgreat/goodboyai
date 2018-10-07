@@ -8,10 +8,14 @@ def main():
 
 	out1 = neuron(inputs = [inp1, inp2], weights = [1, 1], bias = 0)
 
-	for i in range(100):
+	for i in range(10):
 	
-		print(out1.get_output())
-		print(out1.get_last_diff())
+		print(out1.get_output(i))
+
+	inp1.set_output(-1)
+	for i in range(10):
+	
+		print(out1.get_output(i))
 
 if __name__ == "__main__":
 	main()

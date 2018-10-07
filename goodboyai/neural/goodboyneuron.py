@@ -4,9 +4,9 @@ from collections import deque
 class neural_fir(object):
 	def __init__(self, taps = [0.25, 0.5, 0.25]):
 		self.taps = taps
-		self.samps = deque([]) 
-		for tap in self.taps:
-			self.samps.append(0)
+		self.samps = deque([], len(taps)) 
+		for i in range(len(self.taps) + 1):
+			self.samps.appendleft(float(0))
 		self.calc_output()
 
 	def calc_output(self):
@@ -18,55 +18,83 @@ class neural_fir(object):
 		return self.output
 
 	def insert_sample(self, samp):
-		self.samps.append(samp)
-		self.samps.popleft()
+		self.samps.appendleft(samp)
 		self.calc_output()
 
 	def get_output(self):
 		return self.output
 
 def sigmoid(x):
-	return 1 / (1 + np.exp(-x))
+	return 2 * ((1 / (1 + np.exp(-x))) - 0.5)
+
+class neural_connection(object):
+	def __init__(self, in_neuron, weight, degr_factor):
+		self.in_neuron = in_neuron
+		self.weight = weight
+		self.degr_factor = degr_factor
+	
+	def get_output(self, n_iter):
+		#Calculate output
+		neuron_output = self.in_neuron.get_output(n_iter)
+		weighted_in = neuron_output * self.weight
+		#Degrade weight
+		self.weight *= (1 - self.degr_factor * abs(neuron_output))
+		return weighted_in
 
 class neuron(object):
-	def __init__(self, inputs, weights = None, bias = 0, degr_factor = 0.0001):
+	def __init__(self, inputs, weights = None, bias = 0, degr_factor = 0.001,\
+				n_outputs_saved = 100):
 
 		if weights == None:
 			weights = np.zeros(len(inputs))
 
-		self.connections = [[inputs[i], weights[i]] for i in range(len(inputs))]
+		self.connections = [neural_connection(inputs[i], weights[i],\
+												degr_factor)
+								for i in range(len(inputs))]
 		self.bias = bias
 		self.fir = neural_fir()
-		self.last_diff = 0
-		self.last_output = 0
 		self.degr_factor = degr_factor
+		self.last_iter = -1
+		self.output_queue = deque([], n_outputs_saved)
+		for i in range(n_outputs_saved):
+			self.output_queue.appendleft(0)
+		#Initializing endorphinization 
+		self.endorphinize_weights = 
 
-	def get_output(self):
+	def get_output(self, n_iter):
+		if(n_iter == self.last_iter):
+			return self.last_output()
+		self.last_iter = n_iter
 		sum = 0
 		for connection in self.connections:
-			weighted_in = connection[0].get_output() * connection[1]
-			sum += weighted_in
-			connection[1] = connection[1] * (1 - self.degr_factor \
-				* abs(connection[0].get_output()))
+			sum += connection.get_output(n_iter)
 		sum += self.bias
-		self.fir.insert_sample(sigmoid(sum) - 0.5)
+		self.fir.insert_sample(sigmoid(sum))
 		new_output = self.fir.get_output()
-		self.last_diff = new_output - self.last_output
-		self.last_output = new_output
-		return self.last_output
+		self.output_queue.appendleft(self.fir.get_output())
 
-	def get_last_diff(self):
-		return self.last_diff
+		return self.last_output()
 
+	def last_output(self):
+		return self.output_queue[0]
+	
 	def connect(self, other_neuron, weight = 0):
-		self.connections.append((other_neuron, weight))
+		self.connections.appendleft((other_neuron, weight))
 
-class input_neuron(object):
+	def endorphinize(self, value):
+		
+
+class input_neuron(neuron):
 	def __init__(self, output = 0):
+		neuron.__init__(self, [])
 		self.output = output
 
 	def set_output(self, n):
 		self.output = n
 
-	def get_output(self, ):
-		return self.output
+	def get_output(self, n_iter):
+		if(n_iter == self.last_iter):
+			return self.last_output()
+
+		self.output_queue.appendleft(self.output)
+		return self.last_output()
