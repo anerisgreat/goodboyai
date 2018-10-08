@@ -76,28 +76,43 @@ def main():
 					iter_input.append(-1)
 			else:
 				iter_input.append(0)
-		for x in range(1000):
+		for x in range(10):
 			net.set_inputs(iter_input)
 			iter_output = net.get_output_and_iterate()
 
-			endorphinize = inner(iter_input, iter_output) * 1
+			endorphinize = inner(iter_input, iter_output) / 3
 
 			#endorphinize = iter_input[0] * iter_output[0]
 			#for j in range(1, leng):
 			#	endorphinize = min(endorphinize, iter_input[j] * iter_output[j])
-			endorphinize *= 1
+			endorphinize *= 3
 			#print(endorphinize)
 
-			net.endorphinize(endorphinize)
+			#if(not endorphinize == 0):
+			if(False):
 			#print('ITER')
-			#print('INPUT: ' + str(iter_input))
-			#print('OUTPUT: ' + str(iter_output))
-			#print('ENDORPHINIZE: ' + str(endorphinize))
+				print('INPUT: ' + str(iter_input))
+				print('OUTPUT: ' + str(iter_output))
+				print('ENDORPHINIZE: ' + str(endorphinize))
+				print('FUCKING OUTPUTABLES: ' + str(len(net.outputables)))
+				print('WEIGHTS: ')
+				print('Inputs: ')
+				for inp in net.inputs:
+					print('UUID: ' + str(inp.uuid))
+				for inputable in net.inputables:
+					print('INPUTABLE')
+					print('    UUID ' + str(inputable.uuid))
+					print('    IS OUTPUT: ' + str(inputable in net.outputs))
+					for connection in inputable.connections:
+						print('        WEIGHT: ' + str(connection.weight))
+						print('        UID: ' + str(connection.in_neuron.uuid))
+				if(raw_input() == 'q'):
+					wf.close()
+					exit()
+			net.endorphinize(endorphinize)
 
-			wf.write(str(endorphinize) + ',')
-#			if(raw_input() == 'q'):
-#				wf.close()
-#				exit()
+
+			wf.write(str(endorphinize) + ',' + str(len(net.inputables)) + '\r\n')
 
 	wf.close()
 	exit()

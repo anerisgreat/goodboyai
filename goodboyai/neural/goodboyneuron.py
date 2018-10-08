@@ -8,7 +8,7 @@ max_degr_factor = 0.5
 class neural_fir(object):
 	def __init__(self, taps = [0.25, 0.5, 0.25]):
 		self.taps = taps
-		self.taps = [1] # override taps for now
+#		self.taps = [1] # override taps for now
 		self.samps = deque([], len(taps)) 
 		for i in range(len(self.taps) + 1):
 			self.samps.appendleft(float(0))
@@ -30,7 +30,8 @@ class neural_fir(object):
 		return self.output
 
 def sigmoid(x):
-	return 2 * ((1 / (1 + np.exp(-x))) - 0.01)
+	ret = 2 * ((1 / (1 + np.exp(-x)))) - 1
+	return ret
 
 class neural_connection(object):
 	def __init__(self, in_neuron, weight, degr_factor = max_degr_factor):
@@ -41,15 +42,22 @@ class neural_connection(object):
 	def get_output(self, n_iter):
 		#Calculate output
 		neuron_output = self.in_neuron.get_output(n_iter)
-		weighted_in = neuron_output * self.weight
+		weighted_in = self.weight * neuron_output
 		#Degrade weight
-		self.weight *= (1 - self.degr_factor * abs(neuron_output))
+		#self.weight *= (1 - self.degr_factor * abs(neuron_output))
+		change = self.degr_factor * abs(neuron_output)
+		if(self.weight > change):
+			self.weight -= change
+		elif(self.weight < -change):
+			self.weight += change
+		else:
+			self.weight = 0
 
 		return weighted_in
 
 class neuron(object):
 	def __init__(self, inputs=None, weights = None, bias = 0,\
-				degr_factor = 0.001, n_outputs_saved = 100):
+				degr_factor = 0.01, n_outputs_saved = 100):
 
 		if(not inputs == None):
 			if weights == None:
@@ -65,7 +73,6 @@ class neuron(object):
 		self.last_iter = -1
 		self.output_queue = deque([], n_outputs_saved)
 		self.uuid = uuid4()
-		self.parents = []
 		for i in range(n_outputs_saved):
 			self.output_queue.appendleft(0)
 		#Initializing endorphinization 
@@ -92,52 +99,48 @@ class neuron(object):
 	def connect(self, other_neuron, weight = 0):
 		new_connection = neural_connection(other_neuron, weight)
 		self.connections.append(new_connection)
-		other_neuron.parents.append(self)
 	
-	def cleanup(self, cleanup_factor = 1e-9):
+	def cleanup(self, cleanup_factor = 1):
 		connections_to_remove = []
 		for connection in self.connections:
-			if abs(connection.weight) < cleanup_factor:
+			if (abs(connection.weight) <= cleanup_factor or \
+				((not type(connection.in_neuron) is input_neuron) and \
+					(len(connection.in_neuron.connections) == 0)) ):
 				connections_to_remove.append(connection)
 
 		for connection in connections_to_remove:
 			self.connections.remove(connection)
-			connection.in_neuron.parents.remove(self)
-			print('OH NO IM GONE')
 	
 	def node_deleted(self, node_to_delete):
 		to_remove = []
 		for connection in self.connections:
-			if connection.input_node == node_to_delete:
+			if connection.in_neuron == node_to_delete:
 				to_remove.append(connection)
 		for connection in to_remove:
 			self.connections.remove(connection)
 
 	def endorphinize(self, value):
 		for connection in self.connections:
-			contribution = abs(np.inner(self.endorphinize_weights, \
-							connection.in_neuron.output_queue))
-			connection.degr_factor *= (1 - max(contribution, 0) * value)
-			if(abs(connection.degr_factor < 1e-20)):
-				if(connection.degr_factor < 0):
-					connection.degr_factor = -1e-20
-				else:
-					connection.degr_factor = 1e-20
-			connection.weight *= \
-				(1 + contribution * value )
+			weight_sign = 1
+			if(connection.weight < 0):
+				weight_sign = -1
 
-			if(connection.weight > 10000000):
-				connection.weight = 10000000
-			if(connection.weight < -10000000):
-				connection.weight = -10000000
+			contribution = abs((np.inner(self.endorphinize_weights, \
+							connection.in_neuron.output_queue)))
 
-#			if(value > 0):
-#				print('OH FUCK YAY SHIT TITS')
-#				print('degr factor: ' + str(connection.degr_factor))
-#				print('contribution: ' + str(contribution))
-#				print('weight: ' + str(connection.weight))
-
-			
+			#connection.degr_factor *= (1 - max(contribution, 0) * value)
+			change = contribution * value * weight_sign * 0.9
+			if(False and value > 0.01):
+				print('Welcome to the endorphinization station')
+				print('UUID: ' + str(self.uuid))
+				print('VALUE: ' + str(value))
+				print('CONN UUID: ' + str(connection.in_neuron.uuid))
+				print('CHANGE: ' + str(change))
+			if(change * connection.weight < 0 \
+				and abs(connection.weight) < abs(change)):
+				connection.weight = 0
+			else:
+				connection.weight += change
 
 class input_neuron(neuron):
 	def __init__(self, output = 0):

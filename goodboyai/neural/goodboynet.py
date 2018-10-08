@@ -40,12 +40,11 @@ class neural_net(object):
 	def get_output(self):
 		return [output.get_output(self.current_iter) for output in self.outputs]
 
-	def rand_weight(self, max_weight = 2):
+	def rand_weight(self, max_weight = 5):
 		return (random.random() * 2 * max_weight) - max_weight	
 	
 	def create_new_rand_neurons(self, n_to_create):
-		inputable_choice_weights = [abs(inp.get_output(self.current_iter)) \
-					for inp in self.inputables]
+		inputable_choice_weights = [1 for inp in self.inputables] 
 
 		outputable_choice_weights = [abs(outp.get_output(self.current_iter)) \
 					for outp in self.outputables]
@@ -68,8 +67,8 @@ class neural_net(object):
 			self.add_neuron(new_neu)
 
 	def cleanup(self):
-		for outpu in self.outputables:
-			outpu.cleanup()
+		for inpu in self.inputables:
+			inpu.cleanup()
 
 		removed_flag = True
 		while removed_flag:
@@ -78,21 +77,42 @@ class neural_net(object):
 				if(len(outpu.connections) == 0):
 					if(not outpu in self.inputs):
 						removed_flag = True
-						self.outputables.remove(outpu)
-						self.inputables.remove(outpu)
-						outpu.node_deleted(self)
-						print('BINGO BANGO BONG')
-						del(outpu)
+						self.remove_node(outpu)
 
+		removed_flag = True
+		while removed_flag:
+			removed_flag = False
+			children = []
+			to_remove = []
+			for inp in self.inputables:
+				for outp in [connection.in_neuron \
+							for connection in inp.connections]:
+					if not outp in self.inputs:
+						if not outp in children:
+							children.append(outp)
+
+			for outp in self.outputables:
+				if not outp in children:
+					if not outp in self.inputs:
+						if not outp in to_remove:
+							to_remove.append(outp)
+
+			for removed in to_remove:
+				self.remove_node(removed)
+				removed_flag = True
+	
+	def remove_node(self, node_to_remove):
+		self.outputables.remove(node_to_remove)
+		self.inputables.remove(node_to_remove)
+		node_to_remove.node_deleted(self)
+		del(node_to_remove)
+	
 	def get_output_and_iterate(self):
-		if(self.current_iter % 100 == 0):
+		if(self.current_iter % 10 == 0):
 			self.cleanup()
 
 		if(self.current_iter % 100 == 0):
 			self.create_new_rand_neurons(1)
-
-		if(self.current_iter % 1000 == 0):
-			print(self.current_iter)
 
 		self.current_iter += 1 
 		ret_output = self.get_output()
