@@ -16,6 +16,7 @@ class neural_net(object):
 		for i in range(n_outputs):
 			self.add_output()
 
+		self.endorphinization = 0
 	def set_input(self, n_input, input_val):
 		self.inputs[n_input].set_output(input_val)
 
@@ -59,7 +60,7 @@ class neural_net(object):
 			neu_to_connect.connect(new_neu, self.rand_weight())
 			neu_new_inputs = choice(
 				self.outputables,
-				2, #number of new inputs
+				1, #number of new inputs
 				outputable_choice_weights)
 			for inp in neu_new_inputs:
 				new_neu.connect(inp, self.rand_weight())
@@ -111,8 +112,9 @@ class neural_net(object):
 		if(self.current_iter % 10 == 0):
 			self.cleanup()
 
-		if(self.current_iter % 100 == 0):
-			self.create_new_rand_neurons(1)
+		if(self.current_iter % 1000 == 0):
+			if(self.endorphinization < 0.8):
+				self.create_new_rand_neurons(1)
 
 		self.current_iter += 1 
 		ret_output = self.get_output()
@@ -120,6 +122,13 @@ class neural_net(object):
 		return ret_output
 	
 	def endorphinize(self, n):
+		to_endorphinize = n-self.endorphinization
+		smooth_factor = 0.1
+		self.endorphinization *= smooth_factor 
+		self.endorphinization += n * (1 - smooth_factor) 
+		#if(n > 0):
+		#	print(str(n) + '\t\t' + str(to_endorphinize))
 		for inputable in self.inputables:
-			inputable.endorphinize(n)
+			inputable.endorphinize(to_endorphinize)
+
 

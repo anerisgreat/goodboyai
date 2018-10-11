@@ -3,12 +3,12 @@ from collections import deque
 from uuid import uuid4
 import math
 
-max_degr_factor = 0.5
+max_degr_factor = 0.1
 
 class neural_fir(object):
 	def __init__(self, taps = [0.25, 0.5, 0.25]):
 		self.taps = taps
-#		self.taps = [1] # override taps for now
+		self.taps = [1] # override taps for now
 		self.samps = deque([], len(taps)) 
 		for i in range(len(self.taps) + 1):
 			self.samps.appendleft(float(0))
@@ -57,7 +57,7 @@ class neural_connection(object):
 
 class neuron(object):
 	def __init__(self, inputs=None, weights = None, bias = 0,\
-				degr_factor = 0.01, n_outputs_saved = 100):
+				degr_factor = max_degr_factor, n_outputs_saved = 100):
 
 		if(not inputs == None):
 			if weights == None:
@@ -129,7 +129,7 @@ class neuron(object):
 							connection.in_neuron.output_queue)))
 
 			#connection.degr_factor *= (1 - max(contribution, 0) * value)
-			change = contribution * value * weight_sign * 0.9
+			change = contribution * value * weight_sign * 0.5
 			if(False and value > 0.01):
 				print('Welcome to the endorphinization station')
 				print('UUID: ' + str(self.uuid))

@@ -76,6 +76,8 @@ def main():
 					iter_input.append(-1)
 			else:
 				iter_input.append(0)
+
+				#iter_input.append(0)
 		for x in range(10):
 			net.set_inputs(iter_input)
 			iter_output = net.get_output_and_iterate()
@@ -111,8 +113,11 @@ def main():
 					exit()
 			net.endorphinize(endorphinize)
 
+			wf.write(str(endorphinize) + ',' + str(len(net.inputables)) + ',' + str(iter_input) + ',' + str(iter_output) + '\r\n')
+		for x in range(10):
+			net.set_inputs([0 for i in range(leng)])
+			iter_output = net.get_output_and_iterate()
 
-			wf.write(str(endorphinize) + ',' + str(len(net.inputables)) + '\r\n')
 
 	wf.close()
 	exit()
