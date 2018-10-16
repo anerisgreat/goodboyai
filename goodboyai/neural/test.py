@@ -78,11 +78,10 @@ def main():
 			else:
 				iter_input.append(0)
 
-				#iter_input.append(0)
 		for x in range(100):
 			net.set_inputs(iter_input)
 			iter_output = net.get_output_and_iterate()
-
+				
 			endorphinize = inner(iter_input, iter_output) / 3
 
 			endorphinize *= 1000
