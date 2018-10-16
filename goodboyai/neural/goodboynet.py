@@ -63,6 +63,9 @@ class neural_net(object):
 				1, #number of new inputs
 				outputable_choice_weights)
 			for inp in neu_new_inputs:
+				if inp in self.inputs:
+					print('HOLY SHIT BATMAN')
+					print(inp.uuid)
 				new_neu.connect(inp, self.rand_weight())
 
 			self.add_neuron(new_neu)
@@ -112,7 +115,7 @@ class neural_net(object):
 		if(self.current_iter % 10 == 0):
 			self.cleanup()
 
-		if(self.current_iter % 1000 == 0):
+		if(self.current_iter % 100 == 0):
 			if(self.endorphinization < 0.8):
 				self.create_new_rand_neurons(1)
 
@@ -123,7 +126,7 @@ class neural_net(object):
 	
 	def endorphinize(self, n):
 		to_endorphinize = n-self.endorphinization
-		smooth_factor = 0.1
+		smooth_factor = 0.5
 		self.endorphinization *= smooth_factor 
 		self.endorphinization += n * (1 - smooth_factor) 
 		#if(n > 0):
@@ -131,4 +134,14 @@ class neural_net(object):
 		for inputable in self.inputables:
 			inputable.endorphinize(to_endorphinize)
 
+	def jsonize(self):
+		ret = {}
+		ret['inputs'] = [inp.jsonize() for inp in self.inputs]
+		ret['outputs'] = [outp.jsonize() for outp in self.outputs]
+		middles = self.inputables
+		for outp in self.outputs:
+			middles.remove(outp)
 
+		ret['middles'] = [mid.jsonize() for mid in middles]
+
+		return ret

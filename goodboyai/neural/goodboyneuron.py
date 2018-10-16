@@ -2,14 +2,16 @@ import numpy as np
 from collections import deque
 from uuid import uuid4
 import math
+from scipy.signal import firwin
 
 max_degr_factor = 0.1
 
 class neural_fir(object):
-	def __init__(self, taps = [0.25, 0.5, 0.25]):
+	def __init__(self, taps = [0.05, 0.075, 0.125, 0.3, 0.3, \
+										0.125, 0.075, 0.05, 0.05]):
 		self.taps = taps
-		self.taps = [1] # override taps for now
-		self.samps = deque([], len(taps)) 
+		self.taps = firwin(7, 0.2) # override taps for now
+		self.samps = deque([], len(self.taps)) 
 		for i in range(len(self.taps) + 1):
 			self.samps.appendleft(float(0))
 		self.calc_output()
@@ -54,6 +56,14 @@ class neural_connection(object):
 			self.weight = 0
 
 		return weighted_in
+
+	def jsonize(self):
+		ret = {}
+		ret['weight'] = self.weight
+		ret['degr_factor'] = self.degr_factor
+		ret['node_uuid'] = str(self.in_neuron.uuid)
+
+		return ret
 
 class neuron(object):
 	def __init__(self, inputs=None, weights = None, bias = 0,\
@@ -120,6 +130,8 @@ class neuron(object):
 			self.connections.remove(connection)
 
 	def endorphinize(self, value):
+		if(value == 0):
+			return
 		for connection in self.connections:
 			weight_sign = 1
 			if(connection.weight < 0):
@@ -139,8 +151,17 @@ class neuron(object):
 			if(change * connection.weight < 0 \
 				and abs(connection.weight) < abs(change)):
 				connection.weight = 0
+				print('FUCK YOU TOO, WOO')
 			else:
 				connection.weight += change
+
+	def jsonize(self):
+		ret = {}
+		ret['uuid'] = str(self.uuid)
+		ret['connections'] = [connection.jsonize() for connection\
+					in self.connections]
+
+		return ret
 
 class input_neuron(neuron):
 	def __init__(self, output = 0):
@@ -156,3 +177,8 @@ class input_neuron(neuron):
 
 		self.output_queue.appendleft(self.output)
 		return self.last_output()
+
+	def jsonize(self):
+		ret = {}
+		ret['uuid'] = str(self.uuid)
+		return ret

@@ -3,7 +3,7 @@ from numpy import inner
 from goodboyneuron import neuron, input_neuron
 from goodboynet import neural_net
 import random
-
+import json
 
 def print_outputs(neu, n):
 	for i in range(n):
@@ -14,7 +14,8 @@ def test_single_neurons():
 	inp2 = input_neuron(0)
 	inp3 = input_neuron(0)
 
-	out1 = neuron(inputs = [inp1, inp2, inp3], weights = [1, 1, 1], bias = 0)
+	out1 = neuron(inputs = [inp1, inp2, inp3], \
+				weights = [1, 1, 1], bias = 0)
 
 	print('PHASE 1.1')
 	print_outputs(out1, 10)
@@ -64,7 +65,7 @@ def main():
 	net = neural_net(leng, leng)	
 	wf = open('log.csv', 'w')
 	#while True:
-	for p in range(100000):
+	for p in range(500):
 		iter_input = []
 		input_num = random.randrange(leng)
 		for i in range(leng):
@@ -78,16 +79,13 @@ def main():
 				iter_input.append(0)
 
 				#iter_input.append(0)
-		for x in range(10):
+		for x in range(100):
 			net.set_inputs(iter_input)
 			iter_output = net.get_output_and_iterate()
 
 			endorphinize = inner(iter_input, iter_output) / 3
 
-			#endorphinize = iter_input[0] * iter_output[0]
-			#for j in range(1, leng):
-			#	endorphinize = min(endorphinize, iter_input[j] * iter_output[j])
-			endorphinize *= 3
+			endorphinize *= 1000
 			#print(endorphinize)
 
 			#if(not endorphinize == 0):
@@ -119,9 +117,11 @@ def main():
 			iter_output = net.get_output_and_iterate()
 
 
+	
 	wf.close()
-	exit()
-
+	wf2 = open('net_json.json', 'w')
+	wf2.write(json.dumps(net.jsonize(), indent = 4))
+	wf2.close()
 		
 if __name__ == "__main__":
 	main()
