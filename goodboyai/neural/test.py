@@ -63,7 +63,7 @@ def main():
 	#test_single_neurons()
 	leng = 3
 	net = neural_net(leng, leng)	
-	wf = open('log.csv', 'w')
+	wf = open('log.log', 'w')
 	#while True:
 	for p in range(500):
 		iter_input = []

@@ -11,13 +11,13 @@ class test_sim_world(object):
         self.creature_pos = float(self.world_size / 2)
         self.term_width = term_width
         self.is_there_food = True
-        self.food_pos = random.random() * self.world_size * 0.8 + 0.1
+        self.food_pos = random.random() * self.world_size * 0.4 + 0.3
         self.net = neural_net(4, 1)
-        self.log_file = open('food_log.txt', 'w')
+        self.log_file = open('food_log.log', 'w')
     def iter_and_ret_str(self):
         #Move based on previous outputs
 
-        ENDORPH_NUM = 1000
+        ENDORPH_NUM = 10000
 
         iter_output = self.net.get_output_and_iterate()
         endorphinize = 0
@@ -73,8 +73,12 @@ class test_sim_world(object):
 
             if(abs(self.creature_pos - (i * diff)) < diff):
                 ret_str[i] = 'X'
-        self.log_file.write(str(len(self.net.outputables)) + '    ' + 
-                str(endorphinize) + '    ' + '{:10.1f}'.format((iter_output[0])) +
+
+
+        self.log_file.write(str(len(self.net.outputables)) + 
+                '    ' + str(endorphinize) + 
+                '    ' + '{:10.1f}'.format(iter_output[0]) +
+                '    ' + '{:10.1f}'.format(self.creature_pos) +
                 '    ' + str(iter_inputs) + '\r\n')
         return '|' + ''.join(ret_str) + '|'
 

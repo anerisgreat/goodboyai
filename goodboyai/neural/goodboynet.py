@@ -28,7 +28,7 @@ class neural_net(object):
         for i in range(n_outputs):
             self.add_output()
 
-        self.endorph_iir = simple_iir(0.0)
+        self.endorph_iir = simple_iir(0.2)
         self.input_iirs = [simple_iir(0.001) for i in range(n_inputs)]
         self.virtual_inputs = [0 for i in range(n_inputs)]
 
