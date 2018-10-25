@@ -43,8 +43,8 @@ def main(args):
 		else:
 			color_map.append('red')
 
-	#pos = nx.circular_layout(gr)
-	pos = nx.spring_layout(gr)
+	pos = nx.circular_layout(gr)
+	#pos = nx.spring_layout(gr)
 
 	nx.draw(gr, node_color = color_map, pos = pos, with_labels = False)
 	nx.draw_networkx_edge_labels(gr, pos = pos, \
