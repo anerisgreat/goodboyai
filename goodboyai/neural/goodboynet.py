@@ -60,12 +60,10 @@ class neural_net(object):
 			neu_to_connect.connect(new_neu, self.rand_weight())
 			neu_new_inputs = choice(
 				self.outputables,
-				1, #number of new inputs
+				2, #number of new inputs
+
 				outputable_choice_weights)
 			for inp in neu_new_inputs:
-				if inp in self.inputs:
-					print('HOLY SHIT BATMAN')
-					print(inp.uuid)
 				new_neu.connect(inp, self.rand_weight())
 
 			self.add_neuron(new_neu)
@@ -115,7 +113,7 @@ class neural_net(object):
 		if(self.current_iter % 10 == 0):
 			self.cleanup()
 
-		if(self.current_iter % 100 == 0):
+		if(self.current_iter % 1000 == 0):
 			if(self.endorphinization < 0.8):
 				self.create_new_rand_neurons(1)
 

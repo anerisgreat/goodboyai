@@ -4,7 +4,7 @@ from uuid import uuid4
 import math
 from scipy.signal import firwin
 
-max_degr_factor = 0.1
+max_degr_factor = 0.05
 
 class neural_fir(object):
 	def __init__(self, taps = [0.05, 0.075, 0.125, 0.3, 0.3, \
@@ -151,7 +151,6 @@ class neuron(object):
 			if(change * connection.weight < 0 \
 				and abs(connection.weight) < abs(change)):
 				connection.weight = 0
-				print('FUCK YOU TOO, WOO')
 			else:
 				connection.weight += change
 
